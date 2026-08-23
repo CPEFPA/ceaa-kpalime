@@ -11,19 +11,23 @@ export async function PATCH(
     const body = await request.json();
     const { statut } = body;
 
-    if (!["EN_ATTENTE", "CONFIRMEE", "REFUSEE"].includes(statut)) {
-      return NextResponse.json({ error: "Statut invalide." }, { status: 400 });
+    if (!statut) {
+      return NextResponse.json({ error: "Statut manquant" }, { status: 400 });
     }
 
-    const updated = await prisma.inscription.update({
+    // CORRECTION : userInscription au lieu de inscription
+    const updated = await prisma.userInscription.update({
       where: { id: params.id },
       data: { statut },
     });
 
     return NextResponse.json(updated, { status: 200 });
-  } catch (error) {
-    console.error("Erreur mise à jour inscription:", error);
-    return NextResponse.json({ error: "Échec de la mise à jour." }, { status: 500 });
+  } catch (error: any) {
+    console.error("ERREUR MISE À JOUR STATUT:", error);
+    return NextResponse.json(
+      { error: "Échec de la mise à jour", details: error.message },
+      { status: 500 }
+    );
   } finally {
     await prisma.$disconnect();
   }
