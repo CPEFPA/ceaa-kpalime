@@ -4,13 +4,13 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export default async function FormationsPage() {
-  let formations = [];
+  let formations: any[] = [];
   try {
     formations = await prisma.training.findMany({
       orderBy: { createdAt: "desc" },
     });
   } catch (error) {
-    console.error("Erreur de chargement des formations (mode fallback activé):", error);
+    console.error("Erreur de chargement des formations:", error);
   } finally {
     await prisma.$disconnect();
   }
@@ -47,7 +47,6 @@ export default async function FormationsPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Parcours 1 */}
             <div className="bg-slate-50 p-8 rounded-2xl border border-slate-200 hover:shadow-xl transition duration-300 flex flex-col">
               <div className="text-4xl mb-4">🎓</div>
               <h3 className="text-xl font-bold text-indigo-900 mb-3">Préparation au Baccalauréat A4 & Pratique Musicale</h3>
@@ -62,7 +61,6 @@ export default async function FormationsPage() {
               </Link>
             </div>
 
-            {/* Parcours 2 */}
             <div className="bg-indigo-900 text-white p-8 rounded-2xl border border-indigo-800 shadow-xl flex flex-col relative overflow-hidden">
               <div className="absolute top-4 right-4 bg-amber-500 text-indigo-900 text-xs font-bold px-3 py-1 rounded-full">POPULAIRE</div>
               <div className="text-4xl mb-4">🎸</div>
@@ -78,7 +76,6 @@ export default async function FormationsPage() {
               </Link>
             </div>
 
-            {/* Parcours 3 */}
             <div className="bg-slate-50 p-8 rounded-2xl border border-slate-200 hover:shadow-xl transition duration-300 flex flex-col">
               <div className="text-4xl mb-4">🏛️</div>
               <h3 className="text-xl font-bold text-indigo-900 mb-3">Culture, Tourisme & Développement Territorial</h3>
