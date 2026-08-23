@@ -1,0 +1,16 @@
+﻿services:
+  db:
+    image: postgres:16
+    container_name: filiere_musicale_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: filiere
+      POSTGRES_PASSWORD: filiere
+      POSTGRES_DB: filiere_musicale
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:

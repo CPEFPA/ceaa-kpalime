@@ -1,0 +1,366 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  phone         String?
+  passwordHash  String
+  role          Role           @default(CANDIDATE)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  applications  Application[]
+  candidate     Candidate?
+  commune       Commune?
+  documents     Document[]
+  learner       Learner?
+  notifications Notification[]
+  trainer       Trainer?
+}
+
+model Candidate {
+  id               String        @id @default(cuid())
+  userId           String        @unique
+  firstName        String
+  lastName         String
+  birthDate        DateTime?
+  gender           String?
+  nationality      String?
+  city             String?
+  address          String?
+  educationLevel   String?
+  school           String?
+  currentStatus    String?
+  mainInstrumentId String?
+  levelEstimated   String?
+  yearsPractice    Int?
+  experience       String?
+  applications     Application[]
+  mainInstrument   Instrument?   @relation(fields: [mainInstrumentId], references: [id])
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Learner {
+  id            String          @id @default(cuid())
+  userId        String          @unique
+  firstName     String
+  lastName      String
+  instrument    String
+  level         String
+  group         String
+  trainerId     String?
+  progression   Int             @default(0)
+  admissionDate DateTime        @default(now())
+  trainer       Trainer?        @relation(fields: [trainerId], references: [id])
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courses       LearnerCourse[]
+  devoirs       LearnerDevoir[]
+  presences     Presence[]
+}
+
+model Trainer {
+  id          String       @id @default(cuid())
+  userId      String       @unique
+  firstName   String
+  lastName    String
+  specialty   String
+  groups      String[]
+  courses     Course[]
+  evaluations Evaluation[]
+  learners    Learner[]
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Training {
+  id                String           @id @default(cuid())
+  name              String
+  slug              String           @unique
+  description       String
+  targetAudience    String
+  requiredLevel     String?
+  duration          String?
+  modality          String
+  requiresMusicTest Boolean          @default(true)
+  category          String?
+  applications      Application[]
+  modules           TrainingModule[]
+}
+
+model Module {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  title       String
+  description String
+  category    String
+  trainings   TrainingModule[]
+}
+
+model TrainingModule {
+  trainingId String
+  moduleId   String
+  module     Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+
+  @@id([trainingId, moduleId])
+}
+
+model Instrument {
+  id         String      @id @default(cuid())
+  name       String      @unique
+  candidates Candidate[]
+  tests      MusicTest[]
+}
+
+model Application {
+  id          String            @id @default(cuid())
+  userId      String
+  candidateId String?
+  trainingId  String
+  status      ApplicationStatus @default(DRAFT)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  candidate   Candidate?        @relation(fields: [candidateId], references: [id])
+  training    Training          @relation(fields: [trainingId], references: [id])
+  user        User              @relation(fields: [userId], references: [id])
+  musicTests  MusicTest[]
+}
+
+model MusicTest {
+  id            String      @id @default(cuid())
+  applicationId String
+  instrumentId  String
+  scheduledAt   DateTime?
+  location      String?
+  evaluatorId   String?
+  status        TestStatus  @default(SCHEDULED)
+  evaluation    Evaluation?
+  application   Application @relation(fields: [applicationId], references: [id])
+  instrument    Instrument  @relation(fields: [instrumentId], references: [id])
+}
+
+model Evaluation {
+  id             String           @id @default(cuid())
+  testId         String           @unique
+  evaluatorId    String?
+  technicalLevel Int?
+  pitch          Int?
+  rhythm         Int?
+  sightReading   Int?
+  ear            Int?
+  interpretation Int?
+  expression     Int?
+  motivation     Int?
+  experience     Int?
+  observations   String?
+  proposedLevel  EvaluationLevel?
+  finalLevel     EvaluationLevel?
+  createdAt      DateTime         @default(now())
+  evaluator      Trainer?         @relation(fields: [evaluatorId], references: [id])
+  test           MusicTest        @relation(fields: [testId], references: [id])
+}
+
+model Commune {
+  id          String           @id @default(cuid())
+  userId      String           @unique
+  name        String
+  region      String?
+  prefecture  String?
+  contactName String?
+  contactRole String?
+  phone       String?
+  email       String?
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requests    CommuneRequest[]
+}
+
+model CommuneRequest {
+  id        String               @id @default(cuid())
+  communeId String
+  domain    String
+  needs     String
+  status    CommuneRequestStatus @default(DRAFT)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  commune   Commune              @relation(fields: [communeId], references: [id])
+}
+
+model Course {
+  id          String          @id @default(cuid())
+  title       String
+  description String
+  type        CoursType
+  module      String
+  duration    String
+  publishDate DateTime        @default(now())
+  url         String
+  trainerId   String?
+  trainer     Trainer?        @relation(fields: [trainerId], references: [id])
+  devoirs     Devoir[]
+  learners    LearnerCourse[]
+}
+
+model LearnerCourse {
+  id          String  @id @default(cuid())
+  learnerId   String
+  courseId    String
+  progression Int     @default(0)
+  completed   Boolean @default(false)
+  course      Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  learner     Learner @relation(fields: [learnerId], references: [id], onDelete: Cascade)
+
+  @@unique([learnerId, courseId])
+}
+
+model Devoir {
+  id          String          @id @default(cuid())
+  title       String
+  courseId    String
+  description String
+  dueDate     DateTime
+  course      Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  submissions LearnerDevoir[]
+}
+
+model LearnerDevoir {
+  id           String       @id @default(cuid())
+  learnerId    String
+  devoirId     String
+  status       DevoirStatut @default(A_RENDRE)
+  submittedAt  DateTime?
+  note         Int?
+  appreciation String?
+  fileUrl      String?
+  devoir       Devoir       @relation(fields: [devoirId], references: [id], onDelete: Cascade)
+  learner      Learner      @relation(fields: [learnerId], references: [id], onDelete: Cascade)
+
+  @@unique([learnerId, devoirId])
+}
+
+model Evenement {
+  id          String        @id @default(cuid())
+  title       String
+  date        DateTime
+  startTime   String
+  duration    String
+  location    String
+  type        EvenementType
+  description String?
+}
+
+model Presence {
+  id        String   @id @default(cuid())
+  learnerId String
+  courseId  String
+  date      DateTime @default(now())
+  status    String   @default("PRESENT")
+  learner   Learner  @relation(fields: [learnerId], references: [id], onDelete: Cascade)
+
+  @@unique([learnerId, date])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  path      String
+  type      String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  PEDAGOGIC_MANAGER
+  TRAINER
+  EVALUATOR
+  CANDIDATE
+  LEARNER
+  INSTITUTION
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  TEST_SCHEDULED
+  TEST_DONE
+  EVALUATED
+  ADMITTED
+  REJECTED
+  REORIENTED
+  VALIDATED
+}
+
+enum TestStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum EvaluationLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  PERFECTING
+}
+
+enum CommuneRequestStatus {
+  DRAFT
+  NEEDS_ANALYSIS
+  PROGRAM_DEFINED
+  VALIDATED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum DevoirStatut {
+  A_RENDRE
+  RENDU
+  CORRIGE
+  EN_RETARD
+}
+
+enum CoursType {
+  VIDEO
+  PDF
+  AUDIO
+  EXERCICE
+}
+
+enum EvenementType {
+  COURS
+  DEVOIR
+  EXAMEN
+  REPETITION
+  EVENEMENT
+}
+model UserInscription {
+  id        String   @id @default(cuid())
+  nom       String
+  prenom    String
+  email     String
+  telephone String
+  parcours  String
+  niveau    String?
+  message   String?
+  statut    String   @default("EN_ATTENTE")
+  createdAt DateTime @default(now())
+}
