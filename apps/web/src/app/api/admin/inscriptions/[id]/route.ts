@@ -15,7 +15,6 @@ export async function PATCH(
       return NextResponse.json({ error: "Statut manquant" }, { status: 400 });
     }
 
-    // CORRECTION : userInscription au lieu de inscription
     const updated = await prisma.userInscription.update({
       where: { id: params.id },
       data: { statut },
