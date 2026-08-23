@@ -35,3 +35,5 @@ Plateforme web responsive et PWA pour le CollÃ¨ge d'Enseignement Artistique et
 - Backend : Next.js API ou NestJS
 - Base de donnÃ©es : PostgreSQL + Prisma
 - Authentification : JWT sÃ©curisÃ©
+
+- Déploiement Vercel mis à jour
