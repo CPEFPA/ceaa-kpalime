@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -25,7 +25,7 @@ export async function GET() {
       instrument: s.learner.instrument,
       dateRendu: s.submittedAt ? s.submittedAt.toISOString().split('T')[0] : null,
       statut: s.status,
-      fileUrl: s.fileUrl !== undefined ? s.fileUrl : null
+      fileUrl: null
     }));
 
     return NextResponse.json(formatted);

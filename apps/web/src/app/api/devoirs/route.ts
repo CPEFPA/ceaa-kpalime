@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       note: s.note,
       appreciation: s.appreciation,
       dateRendu: s.submittedAt ? s.submittedAt.toISOString().split('T')[0] : null,
-      fileUrl: s.fileUrl
+      fileUrl: null
     }));
 
     return NextResponse.json(formatted);
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       data: {
         status: "RENDU",
         submittedAt: new Date(),
-        fileUrl: fileUrl || null
+        // fileUrl supprimé - champ inexistant dans le modèle
       },
       include: {
         learner: { include: { trainer: true } },
@@ -81,3 +81,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Erreur lors du rendu" }, { status: 500 });
   }
 }
+
