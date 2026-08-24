@@ -43,7 +43,7 @@ export default function InscriptionForm() {
       setSuccess(true);
     } catch (err) {
       console.error(err);
-      setErrorMsg(err.message);
+      setErrorMsg((err as any).message || "Une erreur est survenue");
     } finally {
       setIsSubmitting(false);
     }
@@ -123,4 +123,5 @@ export default function InscriptionForm() {
     </form>
   );
 }
+
 
